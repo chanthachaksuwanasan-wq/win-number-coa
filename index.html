@@ -3,6 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <title>เขียนจากโปรแกรมเมอร์เจมส์</title>
+
+<!-- favicon -->
+<link rel="icon" href="favicon.ico" type="image/x-icon">
+
 <style>
 body{
   background:#000;
@@ -17,7 +21,7 @@ input{
 }
 button{
   padding:8px 14px;
-  margin-left:6px;
+  margin:4px;
   cursor:pointer;
 }
 .box{
@@ -32,6 +36,11 @@ button{
 }
 h1{margin-top:20px;}
 .sub{color:#00e5ff;}
+.copy{
+  background:#00e5ff;
+  border:none;
+  border-radius:6px;
+}
 </style>
 </head>
 
@@ -42,6 +51,7 @@ h1{margin-top:20px;}
 
 <br>
 <input id="input" placeholder="ใส่เลข เช่น 123456">
+<br><br>
 <button onclick="run()">คำนวณ</button>
 <button onclick="resetAll()">Reset</button>
 
@@ -49,15 +59,19 @@ h1{margin-top:20px;}
 <div id="base"></div>
 
 <h3>วิน 2 ตัว ไม่รวมเบิ้ล</h3>
+<button class="copy" onclick="copyText('w2')">คัดลอก</button>
 <div class="box" id="w2"></div>
 
 <h3>วิน 2 ตัว รวมเบิ้ล</h3>
+<button class="copy" onclick="copyText('w2d')">คัดลอก</button>
 <div class="box" id="w2d"></div>
 
 <h3>วิน 3 ตัว ไม่รวมเบิ้ล</h3>
+<button class="copy" onclick="copyText('w3')">คัดลอก</button>
 <div class="box" id="w3"></div>
 
 <h3>วิน 3 ตัว รวมเบิ้ล</h3>
+<button class="copy" onclick="copyText('w3d')">คัดลอก</button>
 <div class="box" id="w3d"></div>
 
 <script>
@@ -79,10 +93,9 @@ function run(){
   }
 
   const d = unique(num.split(''));
-
   document.getElementById("base").innerText = d.join('');
 
-  // ---------- 2 ตัว ไม่รวมเบิ้ล ----------
+  // 2 ตัว ไม่รวมเบิ้ล
   let w2=[];
   for(let i=0;i<d.length;i++){
     for(let j=i+1;j<d.length;j++){
@@ -90,16 +103,15 @@ function run(){
     }
   }
 
-  // ---------- 2 ตัว รวมเบิ้ล ----------
+  // 2 ตัว รวมเบิ้ล (ไม่กลับ)
   let w2d=[];
   for(let i=0;i<d.length;i++){
-    w2d.push(d[i]+d[i]);
-    for(let j=i+1;j<d.length;j++){
+    for(let j=i;j<d.length;j++){
       w2d.push(d[i]+d[j]);
     }
   }
 
-  // ---------- 3 ตัว ไม่รวมเบิ้ล ----------
+  // 3 ตัว ไม่รวมเบิ้ล
   let w3=[];
   for(let i=0;i<d.length;i++){
     for(let j=i+1;j<d.length;j++){
@@ -109,23 +121,31 @@ function run(){
     }
   }
 
-  // ---------- 3 ตัว รวมเบิ้ล (ไม่กลับ) ----------
+  // 3 ตัว รวมเบิ้ล (ไม่กลับ)
   let w3d=[];
   for(let i=0;i<d.length;i++){
-    w3d.push(d[i]+d[i]+d[i]);
-    for(let j=i+1;j<d.length;j++){
-      w3d.push(d[i]+d[i]+d[j]);
-      w3d.push(d[i]+d[j]+d[j]);
-      for(let k=j+1;k<d.length;k++){
+    for(let j=i;j<d.length;j++){
+      for(let k=j;k<d.length;k++){
         w3d.push(d[i]+d[j]+d[k]);
       }
     }
   }
 
+  w2 = [...new Set(w2)];
+  w2d = [...new Set(w2d)];
+  w3 = [...new Set(w3)];
+  w3d = [...new Set(w3d)];
+
   document.getElementById("w2").innerText = w2.join(' ');
   document.getElementById("w2d").innerText = w2d.join(' ');
   document.getElementById("w3").innerText = w3.join(' ');
   document.getElementById("w3d").innerText = w3d.join(' ');
+}
+
+function copyText(id){
+  const text = document.getElementById(id).innerText;
+  if(!text) return;
+  navigator.clipboard.writeText(text);
 }
 
 function resetAll(){
@@ -140,6 +160,8 @@ function resetAll(){
 
 </body>
 </html>
+
+
 
 
 
