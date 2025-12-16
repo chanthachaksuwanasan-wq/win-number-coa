@@ -5,37 +5,64 @@
 <title>โปรแกรมวินเลข</title>
 <style>
 body{
-  background:#000;color:#fff;
+  background:#000;
+  color:#fff;
   font-family:sans-serif;
-  text-align:center;padding:20px
+  text-align:center;
+  padding:20px
 }
-input{font-size:20px;padding:10px;width:260px;border-radius:10px;border:none;text-align:center}
-.box{background:#fff;color:#000;padding:15px;margin:10px auto;width:90%;border-radius:10px;word-wrap:break-word}
-button{padding:6px 14px;border-radius:20px;border:none;cursor:pointer}
-.copy{background:#2196F3;color:#fff}
-.notice{color:#0f0;font-size:14px;height:18px}
+input{
+  font-size:20px;
+  padding:10px;
+  width:260px;
+  border-radius:10px;
+  border:none;
+  text-align:center
+}
+.box{
+  background:#fff;
+  color:#000;
+  padding:15px;
+  margin:10px auto;
+  width:95%;
+  border-radius:10px;
+  word-break:break-word
+}
+button{
+  padding:6px 14px;
+  border-radius:20px;
+  border:none;
+  cursor:pointer;
+  background:#2196F3;
+  color:#fff
+}
+.notice{
+  height:18px;
+  color:#0f0;
+  font-size:14px
+}
 </style>
 </head>
 <body>
 
 <h2>โปรแกรมวินเลข</h2>
-<input id="num" placeholder="กรอก 123456 เท่านั้น">
+<input id="num" placeholder="กรอกเลข เช่น 123456">
 
 <div class="notice" id="msg"></div>
 
 <h3>เลขตั้งต้น</h3>
 <div id="base">-</div>
 
-<h3>วิน 2 ตัว ไม่รวมเบิ้ล <button class="copy" onclick="cp('twoNo')">คัดลอก</button></h3>
+<h3>วิน 2 ตัว ไม่รวมเบิ้ล <button onclick="copy('twoNo')">คัดลอก</button></h3>
 <div id="twoNo" class="box"></div>
 
-<h3>วิน 2 ตัว รวมเบิ้ล <button class="copy" onclick="cp('twoYes')">คัดลอก</button></h3>
+<h3>วิน 2 ตัว รวมเบิ้ล <button onclick="copy('twoYes')">คัดลอก</button></h3>
 <div id="twoYes" class="box"></div>
 
-<h3>วิน 3 ตัว ไม่รวมเบิ้ล <button class="copy" onclick="cp('threeNo')">คัดลอก</button></h3>
+<h3>วิน 3 ตัว ไม่รวมเบิ้ล <button onclick="copy('threeNo')">คัดลอก</button></h3>
 <div id="threeNo" class="box"></div>
 
-<h3>วิน 3 ตัว รวมเบิ้ล <button class="copy" onclick="cp('threeYes')">คัดลอก</button></h3>
+<h3>วิน 3 ตัว รวมเบิ้ล <button onclick="copy('threeYes')">คัดลอก</button></h3>
 <div id="threeYes" class="box"></div>
 
 <script>
@@ -44,13 +71,13 @@ const input = document.getElementById("num");
 input.addEventListener("input", ()=>{
   const v = input.value;
 
-  // ❌ ถ้ามีอักขระอื่น = ไม่ทำงาน
-  if(!/^[0-9]+$/.test(v)){
+  // ❌ ถ้ามีอักขระอื่น ไม่ทำงาน
+  if(!/^[0-9]*$/.test(v)){
     clearAll();
     return;
   }
 
-  // ตัดเลขช้ำ
+  // ตัดเลขซ้ำ
   let seen = new Set();
   let clean = "";
   for(let d of v){
@@ -60,8 +87,13 @@ input.addEventListener("input", ()=>{
     }
   }
 
+  if(clean.length < 2){
+    clearAll();
+    return;
+  }
+
   document.getElementById("base").innerText = clean;
-  calc(clean);
+  generate(clean);
 });
 
 function clearAll(){
@@ -70,41 +102,44 @@ function clearAll(){
   });
 }
 
-function calc(num){
-  let d = num.split("");
+function generate(num){
+  const d = num.split("");
 
-  // ===== 2 ตัว =====
-  let two = [];
+  /* ===== 2 ตัว ===== */
+  let twoNo = [];
+  let twoYes = [];
+
   for(let i=0;i<d.length;i++){
+    // รวมเบิ้ล
+    twoYes.push(d[i]+d[i]);
+
     for(let j=i+1;j<d.length;j++){
-      two.push(d[i]+d[j]);
+      const v = d[i]+d[j];
+      twoNo.push(v);
+      twoYes.push(v);
     }
   }
-
-  let twoNo = two.filter(x=>x[0]!==x[1]);
-  let dbl = d.map(x=>x+x);
 
   document.getElementById("twoNo").innerText = twoNo.join(" ");
-  document.getElementById("twoYes").innerText = [...twoNo,...dbl].join(" ");
+  document.getElementById("twoYes").innerText = twoYes.join(" ");
 
-  // ===== 3 ตัว =====
-  let three = [];
-  for(let i=0;i<d.length;i++){
-    for(let j=i+1;j<d.length;j++){
-      for(let k=j+1;k<d.length;k++){
-        three.push(d[i]+d[j]+d[k]);
-      }
-    }
-  }
-
-  let threeNo = three.filter(x=>new Set(x).size===3);
-
-  // รวมเบิ้ล 3 ตัว
+  /* ===== 3 ตัว ===== */
+  let threeNo = [];
   let threeYes = [];
-  for(let a of d){
-    for(let b of d){
-      for(let c of d){
-        threeYes.push(a+b+c);
+
+  for(let i=0;i<d.length;i++){
+    // เบิ้ล 3 ตัว
+    threeYes.push(d[i]+d[i]+d[i]);
+
+    for(let j=i+1;j<d.length;j++){
+      // เบิ้ลหน้า / กลาง / หลัง
+      threeYes.push(d[i]+d[i]+d[j]);
+      threeYes.push(d[i]+d[j]+d[j]);
+
+      for(let k=j+1;k<d.length;k++){
+        const v = d[i]+d[j]+d[k];
+        threeNo.push(v);
+        threeYes.push(v);
       }
     }
   }
@@ -113,15 +148,17 @@ function calc(num){
   document.getElementById("threeYes").innerText = threeYes.join(" ");
 }
 
-function cp(id){
+function copy(id){
   navigator.clipboard.writeText(document.getElementById(id).innerText);
-  document.getElementById("msg").innerText = "คัดลอกแล้ว";
-  setTimeout(()=>msg.innerText="",1000);
+  msg.innerText = "คัดลอกแล้ว";
+  setTimeout(()=>msg.innerText="",800);
 }
 </script>
 
 </body>
 </html>
+
+
 
 
 
