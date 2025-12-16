@@ -5,130 +5,125 @@
 <title>โปรแกรมวินเลข</title>
 <style>
 body{
-    background:#000;color:#fff;font-family:sans-serif;text-align:center;padding:20px
+  background:#000;color:#fff;
+  font-family:sans-serif;
+  text-align:center;padding:20px
 }
-input{
-    font-size:20px;padding:10px;width:260px;border-radius:10px;border:none;text-align:center
-}
-button{
-    padding:8px 16px;margin:5px;border:none;border-radius:8px;font-size:16px;cursor:pointer
-}
-.copy{background:#2196f3;color:#fff}
-.reset{background:red;color:#fff}
-.box{
-    background:#fff;color:#000;padding:12px;margin:10px auto;width:90%;
-    border-radius:10px;word-wrap:break-word
-}
-.toast{
-    position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
-    background:#333;color:#fff;padding:8px 16px;border-radius:20px;
-    opacity:0;transition:.3s
-}
+input{font-size:20px;padding:10px;width:260px;border-radius:10px;border:none;text-align:center}
+.box{background:#fff;color:#000;padding:15px;margin:10px auto;width:90%;border-radius:10px;word-wrap:break-word}
+button{padding:6px 14px;border-radius:20px;border:none;cursor:pointer}
+.copy{background:#2196F3;color:#fff}
+.notice{color:#0f0;font-size:14px;height:18px}
 </style>
 </head>
 <body>
 
-<h1>โปรแกรมวินเลข</h1>
+<h2>โปรแกรมวินเลข</h2>
+<input id="num" placeholder="กรอก 123456 เท่านั้น">
 
-<input id="input" placeholder="ใส่เลขติดกัน เช่น 123456">
-<button class="reset" onclick="resetAll()">Reset</button>
+<div class="notice" id="msg"></div>
 
 <h3>เลขตั้งต้น</h3>
 <div id="base">-</div>
 
-<h3>วิน 2 ตัว ไม่รวมเบิ้ล <button class="copy" onclick="copyText('twoNo')">คัดลอก</button></h3>
+<h3>วิน 2 ตัว ไม่รวมเบิ้ล <button class="copy" onclick="cp('twoNo')">คัดลอก</button></h3>
 <div id="twoNo" class="box"></div>
 
-<h3>วิน 2 ตัว รวมเบิ้ล <button class="copy" onclick="copyText('twoYes')">คัดลอก</button></h3>
+<h3>วิน 2 ตัว รวมเบิ้ล <button class="copy" onclick="cp('twoYes')">คัดลอก</button></h3>
 <div id="twoYes" class="box"></div>
 
-<h3>วิน 3 ตัว ไม่รวมเบิ้ล <button class="copy" onclick="copyText('threeNo')">คัดลอก</button></h3>
+<h3>วิน 3 ตัว ไม่รวมเบิ้ล <button class="copy" onclick="cp('threeNo')">คัดลอก</button></h3>
 <div id="threeNo" class="box"></div>
 
-<h3>วิน 3 ตัว รวมเบิ้ล <button class="copy" onclick="copyText('threeYes')">คัดลอก</button></h3>
+<h3>วิน 3 ตัว รวมเบิ้ล <button class="copy" onclick="cp('threeYes')">คัดลอก</button></h3>
 <div id="threeYes" class="box"></div>
 
-<div id="toast" class="toast">คัดลอกแล้ว</div>
-
 <script>
-const input=document.getElementById("input");
+const input = document.getElementById("num");
 
-input.addEventListener("input",()=>{
-    const raw=input.value.trim();
+input.addEventListener("input", ()=>{
+  const v = input.value;
 
-    // ❌ ถ้ามีอักขระอื่นหรือเว้นวรรค → ไม่ทำงาน
-    if(!/^[0-9]+$/.test(raw)){
-        resetResult();
-        return;
+  // ❌ ถ้ามีอักขระอื่น = ไม่ทำงาน
+  if(!/^[0-9]+$/.test(v)){
+    clearAll();
+    return;
+  }
+
+  // ตัดเลขช้ำ
+  let seen = new Set();
+  let clean = "";
+  for(let d of v){
+    if(!seen.has(d)){
+      seen.add(d);
+      clean += d;
     }
+  }
 
-    // ตัดตัวซ้ำ
-    let clean="";
-    for(let c of raw){
-        if(!clean.includes(c)) clean+=c;
-    }
-
-    document.getElementById("base").innerText=clean;
-    generate(clean);
+  document.getElementById("base").innerText = clean;
+  calc(clean);
 });
 
-function generate(num){
-    let d=num.split("");
+function clearAll(){
+  ["base","twoNo","twoYes","threeNo","threeYes"].forEach(id=>{
+    document.getElementById(id).innerText = "";
+  });
+}
 
-    // ===== 2 ตัว =====
-    let twoNo=[],twoYes=[];
-    for(let i=0;i<d.length;i++){
-        for(let j=0;j<d.length;j++){
-            if(i===j) continue;
-            let n=d[i]+d[j];
-            if(d[i]!==d[j]) twoNo.push(n);
-            twoYes.push(n);
-        }
+function calc(num){
+  let d = num.split("");
+
+  // ===== 2 ตัว =====
+  let two = [];
+  for(let i=0;i<d.length;i++){
+    for(let j=i+1;j<d.length;j++){
+      two.push(d[i]+d[j]);
     }
+  }
 
-    // เพิ่มเบิ้ล
-    d.forEach(x=>twoYes.push(x+x));
+  let twoNo = two.filter(x=>x[0]!==x[1]);
+  let dbl = d.map(x=>x+x);
 
-    document.getElementById("twoNo").innerText=[...new Set(twoNo)].join(" ");
-    document.getElementById("twoYes").innerText=[...new Set(twoYes)].join(" ");
+  document.getElementById("twoNo").innerText = twoNo.join(" ");
+  document.getElementById("twoYes").innerText = [...twoNo,...dbl].join(" ");
 
-    // ===== 3 ตัว =====
-    let threeNo=[],threeYes=[];
-    for(let i=0;i<d.length;i++){
-        for(let j=0;j<d.length;j++){
-            for(let k=0;k<d.length;k++){
-                let n=d[i]+d[j]+d[k];
-                threeYes.push(n);
-                if(d[i]!==d[j] && d[j]!==d[k] && d[i]!==d[k]){
-                    threeNo.push(n);
-                }
-            }
-        }
+  // ===== 3 ตัว =====
+  let three = [];
+  for(let i=0;i<d.length;i++){
+    for(let j=i+1;j<d.length;j++){
+      for(let k=j+1;k<d.length;k++){
+        three.push(d[i]+d[j]+d[k]);
+      }
     }
+  }
 
-    document.getElementById("threeNo").innerText=[...new Set(threeNo)].join(" ");
-    document.getElementById("threeYes").innerText=[...new Set(threeYes)].join(" ");
+  let threeNo = three.filter(x=>new Set(x).size===3);
+
+  // รวมเบิ้ล 3 ตัว
+  let threeYes = [];
+  for(let a of d){
+    for(let b of d){
+      for(let c of d){
+        threeYes.push(a+b+c);
+      }
+    }
+  }
+
+  document.getElementById("threeNo").innerText = threeNo.join(" ");
+  document.getElementById("threeYes").innerText = threeYes.join(" ");
 }
 
-function copyText(id){
-    navigator.clipboard.writeText(document.getElementById(id).innerText);
-    const t=document.getElementById("toast");
-    t.style.opacity=1;
-    setTimeout(()=>t.style.opacity=0,1200);
-}
-
-function resetResult(){
-    ["twoNo","twoYes","threeNo","threeYes"].forEach(id=>document.getElementById(id).innerText="");
-    document.getElementById("base").innerText="-";
-}
-
-function resetAll(){
-    input.value="";
-    resetResult();
+function cp(id){
+  navigator.clipboard.writeText(document.getElementById(id).innerText);
+  document.getElementById("msg").innerText = "คัดลอกแล้ว";
+  setTimeout(()=>msg.innerText="",1000);
 }
 </script>
+
 </body>
 </html>
+
+
 
 
 
