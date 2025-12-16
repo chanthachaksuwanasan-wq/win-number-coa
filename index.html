@@ -1,117 +1,117 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-<meta charset="UTF-8" />
-<title>เขียนจากโปรแกรมเมอร์เจมส์</title>
-<style>
-    body{background:#000;color:#fff;font-family:sans-serif;text-align:center;padding:20px}
-    h1{margin-bottom:5px}
-    h2{margin-top:25px}
-    .sub{color:#00e5ff;margin-bottom:20px}
-    input{font-size:20px;padding:10px;width:260px;border-radius:10px;border:none;text-align:center}
-    button{padding:10px 18px;margin:5px;border:none;border-radius:10px;font-size:16px;cursor:pointer}
-    .copy-btn{background:#2196F3;color:#fff}
-    .reset-btn{background:red;color:#fff}
-    .box{background:#fff;color:#000;padding:15px;margin:10px auto;width:90%;border-radius:10px;word-wrap:break-word}
-</style>
+  <meta charset="UTF-8" />
+  <title>เขียนจากโปรแกรมเมอร์เจมส์</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body { background:#000; color:#fff; font-family:Tahoma,sans-serif; text-align:center; }
+    h1 { margin-top:20px; }
+    .sub { color:#00e5ff; margin-bottom:20px; }
+    input { padding:10px; font-size:18px; width:220px; border-radius:8px; }
+    button { padding:10px 16px; border:none; border-radius:8px; cursor:pointer; }
+    .reset { background:red; color:white; margin-left:6px; }
+    .box { background:white; color:black; margin:10px auto; padding:12px; width:90%; border-radius:12px; }
+    .copy { background:#1e90ff; color:white; margin-left:10px; }
+    .title { margin-top:20px; font-weight:bold; }
+  </style>
 </head>
 <body>
 
 <h1>โปรแกรมวินเลข</h1>
 <div class="sub">เขียนจากโปรแกรมเมอร์เจมส์</div>
 
-<input id="input" placeholder="กรอกเลข เช่น 123456" />
-<button class="reset-btn" onclick="resetAll()">Reset</button>
+<input id="numberInput" placeholder="ใส่ตัวเลข" />
+<button class="reset" onclick="resetAll()">Reset</button>
 
-<h2>เลขตั้งต้น</h2>
-<div id="base">-</div>
+<div class="title">เลขตั้งต้น</div>
+<div id="base"></div>
 
-<h2>วิน 2 ตัว ไม่รวมเบิ้ล <button class="copy-btn" onclick="copy('two-no')">คัดลอก</button></h2>
-<div id="two-no" class="box"></div>
+<div class="title">วิน 2 ตัว ไม่รวมเบิ้ล <button class="copy" onclick="copyText('twoNo')">คัดลอก</button></div>
+<div class="box" id="twoNo"></div>
 
-<h2>วิน 2 ตัว รวมเบิ้ล <button class="copy-btn" onclick="copy('two-yes')">คัดลอก</button></h2>
-<div id="two-yes" class="box"></div>
+<div class="title">วิน 2 ตัว รวมเบิ้ล <button class="copy" onclick="copyText('twoYes')">คัดลอก</button></div>
+<div class="box" id="twoYes"></div>
 
-<h2>วิน 3 ตัว ไม่รวมเบิ้ล <button class="copy-btn" onclick="copy('three-no')">คัดลอก</button></h2>
-<div id="three-no" class="box"></div>
+<div class="title">วิน 3 ตัว ไม่รวมเบิ้ล <button class="copy" onclick="copyText('threeNo')">คัดลอก</button></div>
+<div class="box" id="threeNo"></div>
 
-<h2>วิน 3 ตัว รวมเบิ้ล <button class="copy-btn" onclick="copy('three-yes')">คัดลอก</button></h2>
-<div id="three-yes" class="box"></div>
+<div class="title">วิน 3 ตัว รวมเบิ้ล <button class="copy" onclick="copyText('threeYes')">คัดลอก</button></div>
+<div class="box" id="threeYes"></div>
 
 <script>
-function resetAll(){
-    input.value="";
-    base.innerText="-";
-    ['two-no','two-yes','three-no','three-yes'].forEach(id=>document.getElementById(id).innerText="");
-}
+// แก้ error input before initialization + ลอจิกไม่กลับเลข
 
-input.addEventListener('input',()=>{
-    let raw=input.value;
-    if(!/^\d+$/.test(raw)){
-        resetAll();return;
-    }
-    // ตัดเลขซ้ำเฉพาะชุดเดียวกัน
-    let seen=new Set();
-    let digits=[];
-    for(let c of raw){if(!seen.has(c)){seen.add(c);digits.push(c)}}
+document.addEventListener('DOMContentLoaded', () => {
+  const input = document.getElementById('numberInput');
 
-    base.innerText=digits.join('');
-    genAll(digits);
+  input.addEventListener('input', () => {
+    const nums = [...new Set(input.value.replace(/\D/g,'').split(''))];
+    document.getElementById('base').innerText = nums.join('');
+
+    genTwo(nums);
+    genThree(nums);
+  });
 });
 
-function genAll(d){
-    // 2 ตัวไม่รวมเบิ้ล
-    let twoNo=[];
-    for(let i=0;i<d.length;i++){
-        for(let j=i+1;j<d.length;j++) twoNo.push(d[i]+d[j]);
-    }
-    twoNoEl.innerText=twoNo.join(' ');
+function genTwo(nums){
+  let no = [];
+  let yes = [];
 
-    // 2 ตัวรวมเบิ้ล (เรียงถูก)
-    let twoYes=[];
-    for(let i=0;i<d.length;i++){
-        twoYes.push(d[i]+d[i]);
-        for(let j=i+1;j<d.length;j++) twoYes.push(d[i]+d[j]);
+  for(let i=0;i<nums.length;i++){
+    for(let j=i+1;j<nums.length;j++){
+      no.push(nums[i]+nums[j]);
     }
-    twoYesEl.innerText=twoYes.join(' ');
+  }
 
-    // 3 ตัวไม่รวมเบิ้ล
-    let threeNo=[];
-    for(let i=0;i<d.length;i++){
-        for(let j=i+1;j<d.length;j++){
-            for(let k=j+1;k<d.length;k++) threeNo.push(d[i]+d[j]+d[k]);
-        }
+  for(let i=0;i<nums.length;i++){
+    for(let j=0;j<nums.length;j++){
+      yes.push(nums[i]+nums[j]);
     }
-    threeNoEl.innerText=threeNo.join(' ');
+  }
 
-    // 3 ตัวรวมเบิ้ล (ไม่กลับ)
-    let threeYes=[];
-    for(let i=0;i<d.length;i++){
-        threeYes.push(d[i]+d[i]+d[i]);
-        for(let j=i+1;j<d.length;j++){
-            threeYes.push(d[i]+d[i]+d[j]);
-            threeYes.push(d[i]+d[j]+d[j]);
-            for(let k=j+1;k<d.length;k++) threeYes.push(d[i]+d[j]+d[k]);
-        }
-    }
-    threeYesEl.innerText=threeYes.join(' ');
+  document.getElementById('twoNo').innerText = no.join(' ');
+  document.getElementById('twoYes').innerText = yes.join(' ');
 }
 
-function copy(id){
-    navigator.clipboard.writeText(document.getElementById(id).innerText);
-    alert('คัดลอกแล้ว');
+function genThree(nums){
+  let no = [];
+  let yes = [];
+
+  for(let i=0;i<nums.length;i++){
+    for(let j=i+1;j<nums.length;j++){
+      for(let k=j+1;k<nums.length;k++){
+        no.push(nums[i]+nums[j]+nums[k]);
+      }
+    }
+  }
+
+  for(let i=0;i<nums.length;i++){
+    for(let j=0;j<nums.length;j++){
+      for(let k=0;k<nums.length;k++){
+        yes.push(nums[i]+nums[j]+nums[k]);
+      }
+    }
+  }
+
+  document.getElementById('threeNo').innerText = no.join(' ');
+  document.getElementById('threeYes').innerText = yes.join(' ');
 }
 
-const input=document.getElementById('input');
-const base=document.getElementById('base');
-const twoNoEl=document.getElementById('two-no');
-const twoYesEl=document.getElementById('two-yes');
-const threeNoEl=document.getElementById('three-no');
-const threeYesEl=document.getElementById('three-yes');
+function copyText(id){
+  navigator.clipboard.writeText(document.getElementById(id).innerText);
+}
+
+function resetAll(){
+  document.getElementById('numberInput').value='';
+  ['base','twoNo','twoYes','threeNo','threeYes'].forEach(i=>document.getElementById(i).innerText='');
+}
 </script>
 
 </body>
 </html>
+
+
 
 
 
