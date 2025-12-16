@@ -4,98 +4,112 @@
 <meta charset="UTF-8" />
 <title>เขียนจากโปรแกรมเมอร์เจมส์</title>
 <style>
-body{background:#000;color:#fff;font-family:sans-serif;text-align:center}
-input{padding:10px;font-size:18px;width:200px}
-button{padding:8px 14px;font-size:16px;margin-left:5px}
-.box{background:#fff;color:#000;padding:12px;border-radius:10px;margin:10px auto;max-width:900px}
-.title{font-size:28px;font-weight:bold}
-.sub{color:#00e5ff;margin-bottom:10px}
+    body{background:#000;color:#fff;font-family:sans-serif;text-align:center;padding:20px}
+    h1{margin-bottom:5px}
+    h2{margin-top:25px}
+    .sub{color:#00e5ff;margin-bottom:20px}
+    input{font-size:20px;padding:10px;width:260px;border-radius:10px;border:none;text-align:center}
+    button{padding:10px 18px;margin:5px;border:none;border-radius:10px;font-size:16px;cursor:pointer}
+    .copy-btn{background:#2196F3;color:#fff}
+    .reset-btn{background:red;color:#fff}
+    .box{background:#fff;color:#000;padding:15px;margin:10px auto;width:90%;border-radius:10px;word-wrap:break-word}
 </style>
 </head>
 <body>
 
-<div class="title">โปรแกรมวินเลข</div>
+<h1>โปรแกรมวินเลข</h1>
 <div class="sub">เขียนจากโปรแกรมเมอร์เจมส์</div>
 
-<input id="num" placeholder="ใส่เลข เช่น 123456" />
-<button onclick="run()">คำนวณ</button>
-<button onclick="location.reload()">Reset</button>
+<input id="input" placeholder="กรอกเลข เช่น 123456" />
+<button class="reset-btn" onclick="resetAll()">Reset</button>
 
-<h3>เลขตั้งต้น</h3>
-<div id="base"></div>
+<h2>เลขตั้งต้น</h2>
+<div id="base">-</div>
 
-<h3>วิน 2 ตัว ไม่รวมเบิ้ล</h3>
-<div class="box" id="w2"></div>
+<h2>วิน 2 ตัว ไม่รวมเบิ้ล <button class="copy-btn" onclick="copy('two-no')">คัดลอก</button></h2>
+<div id="two-no" class="box"></div>
 
-<h3>วิน 2 ตัว รวมเบิ้ล</h3>
-<div class="box" id="w2d"></div>
+<h2>วิน 2 ตัว รวมเบิ้ล <button class="copy-btn" onclick="copy('two-yes')">คัดลอก</button></h2>
+<div id="two-yes" class="box"></div>
 
-<h3>วิน 3 ตัว ไม่รวมเบิ้ล</h3>
-<div class="box" id="w3"></div>
+<h2>วิน 3 ตัว ไม่รวมเบิ้ล <button class="copy-btn" onclick="copy('three-no')">คัดลอก</button></h2>
+<div id="three-no" class="box"></div>
 
-<h3>วิน 3 ตัว รวมเบิ้ล</h3>
-<div class="box" id="w3d"></div>
+<h2>วิน 3 ตัว รวมเบิ้ล <button class="copy-btn" onclick="copy('three-yes')">คัดลอก</button></h2>
+<div id="three-yes" class="box"></div>
 
 <script>
-function clean(input){
-  return [...new Set(input.replace(/\D/g,'').split(''))];
+function resetAll(){
+    input.value="";
+    base.innerText="-";
+    ['two-no','two-yes','three-no','three-yes'].forEach(id=>document.getElementById(id).innerText="");
 }
 
-function run(){
-  const raw=document.getElementById('num').value;
-  const d=clean(raw);
-  if(d.length<2){alert('ใส่เลขอย่างน้อย 2 ตัว');return;}
-  document.getElementById('base').innerText=d.join('');
-
-  // 2 ตัวไม่รวมเบิ้ล
-  let w2=[];
-  for(let i=0;i<d.length;i++){
-    for(let j=i+1;j<d.length;j++){
-      w2.push(d[i]+d[j]);
+input.addEventListener('input',()=>{
+    let raw=input.value;
+    if(!/^\d+$/.test(raw)){
+        resetAll();return;
     }
-  }
+    // ตัดเลขซ้ำเฉพาะชุดเดียวกัน
+    let seen=new Set();
+    let digits=[];
+    for(let c of raw){if(!seen.has(c)){seen.add(c);digits.push(c)}}
 
-  // 2 ตัวรวมเบิ้ล (เรียงตามแพทเทิร์น)
-  let w2d=[];
-  for(let i=0;i<d.length;i++){
-    w2d.push(d[i]+d[i]);
-    for(let j=i+1;j<d.length;j++){
-      w2d.push(d[i]+d[j]);
-    }
-  }
+    base.innerText=digits.join('');
+    genAll(digits);
+});
 
-  // 3 ตัวไม่รวมเบิ้ล
-  let w3=[];
-  for(let i=0;i<d.length;i++){
-    for(let j=i+1;j<d.length;j++){
-      for(let k=j+1;k<d.length;k++){
-        w3.push(d[i]+d[j]+d[k]);
-      }
+function genAll(d){
+    // 2 ตัวไม่รวมเบิ้ล
+    let twoNo=[];
+    for(let i=0;i<d.length;i++){
+        for(let j=i+1;j<d.length;j++) twoNo.push(d[i]+d[j]);
     }
-  }
+    twoNoEl.innerText=twoNo.join(' ');
 
-  // 3 ตัวรวมเบิ้ล (ไม่กลับ)
-  let w3d=[];
-  for(let i=0;i<d.length;i++){
-    w3d.push(d[i]+d[i]+d[i]);
-    for(let j=i+1;j<d.length;j++){
-      w3d.push(d[i]+d[i]+d[j]);
+    // 2 ตัวรวมเบิ้ล (เรียงถูก)
+    let twoYes=[];
+    for(let i=0;i<d.length;i++){
+        twoYes.push(d[i]+d[i]);
+        for(let j=i+1;j<d.length;j++) twoYes.push(d[i]+d[j]);
     }
-  }
-  for(let i=0;i<d.length;i++){
-    for(let j=i+1;j<d.length;j++){
-      for(let k=j+1;k<d.length;k++){
-        w3d.push(d[i]+d[j]+d[k]);
-      }
-    }
-  }
+    twoYesEl.innerText=twoYes.join(' ');
 
-  document.getElementById('w2').innerText=w2.join(' ');
-  document.getElementById('w2d').innerText=w2d.join(' ');
-  document.getElementById('w3').innerText=w3.join(' ');
-  document.getElementById('w3d').innerText=w3d.join(' ');
+    // 3 ตัวไม่รวมเบิ้ล
+    let threeNo=[];
+    for(let i=0;i<d.length;i++){
+        for(let j=i+1;j<d.length;j++){
+            for(let k=j+1;k<d.length;k++) threeNo.push(d[i]+d[j]+d[k]);
+        }
+    }
+    threeNoEl.innerText=threeNo.join(' ');
+
+    // 3 ตัวรวมเบิ้ล (ไม่กลับ)
+    let threeYes=[];
+    for(let i=0;i<d.length;i++){
+        threeYes.push(d[i]+d[i]+d[i]);
+        for(let j=i+1;j<d.length;j++){
+            threeYes.push(d[i]+d[i]+d[j]);
+            threeYes.push(d[i]+d[j]+d[j]);
+            for(let k=j+1;k<d.length;k++) threeYes.push(d[i]+d[j]+d[k]);
+        }
+    }
+    threeYesEl.innerText=threeYes.join(' ');
 }
+
+function copy(id){
+    navigator.clipboard.writeText(document.getElementById(id).innerText);
+    alert('คัดลอกแล้ว');
+}
+
+const input=document.getElementById('input');
+const base=document.getElementById('base');
+const twoNoEl=document.getElementById('two-no');
+const twoYesEl=document.getElementById('two-yes');
+const threeNoEl=document.getElementById('three-no');
+const threeYesEl=document.getElementById('three-yes');
 </script>
+
 </body>
 </html>
 
