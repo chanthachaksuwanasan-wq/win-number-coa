@@ -1,116 +1,134 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8">
-  <title>วินไม่รวม/รวมเบิ้ล</title>
-  <style>
-    body{
-      background:#000;
-      color:#fff;
-      font-family:Prompt, sans-serif;
-      text-align:center;
-      padding:20px;
-    }
-    h1{font-size:22px;margin-bottom:10px;}
-    textarea{
-      width:90%;
-      max-width:500px;
-      height:100px;
-      border-radius:10px;
-      padding:10px;
-      font-size:16px;
-      border:none;
-    }
-    button{
-      margin:5px;
-      padding:8px 14px;
-      border-radius:20px;
-      border:none;
-      cursor:pointer;
-      font-size:14px;
-    }
-    .copy{background:#0d6efd;color:#fff;}
-    .result{
-      margin:10px auto;
-      max-width:500px;
-      background:#111;
-      padding:10px;
-      border-radius:10px;
-      word-wrap:break-word;
-    }
-    .toast{
-      position:fixed;
-      bottom:20px;
-      left:50%;
-      transform:translateX(-50%);
-      background:#28a745;
-      color:#fff;
-      padding:10px 20px;
-      border-radius:20px;
-      opacity:0;
-      transition:0.3s;
-    }
-    .toast.show{opacity:1;}
-  </style>
+<meta charset="UTF-8">
+<title>โปรแกรมวินเลข</title>
+<style>
+body{
+    background:#000;color:#fff;font-family:sans-serif;text-align:center;padding:20px
+}
+input{
+    font-size:20px;padding:10px;width:260px;border-radius:10px;border:none;text-align:center
+}
+button{
+    padding:8px 16px;margin:5px;border:none;border-radius:8px;font-size:16px;cursor:pointer
+}
+.copy{background:#2196f3;color:#fff}
+.reset{background:red;color:#fff}
+.box{
+    background:#fff;color:#000;padding:12px;margin:10px auto;width:90%;
+    border-radius:10px;word-wrap:break-word
+}
+.toast{
+    position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
+    background:#333;color:#fff;padding:8px 16px;border-radius:20px;
+    opacity:0;transition:.3s
+}
+</style>
 </head>
 <body>
 
-<h1>วิน (ตัดตัวซ้ำอัตโนมัติ)</h1>
-<textarea id="input" placeholder="ใส่ตัวเลข เช่น 123"></textarea><br>
-<button onclick="gen2(false)">วินไม่รวมเบิ้ล 2 ตัว</button>
-<button onclick="gen2(true)">วินรวมเบิ้ล 2 ตัว</button><br>
-<button onclick="gen3(false)">วินไม่รวมเบิ้ล 3 ตัว</button>
-<button onclick="gen3(true)">วินรวมเบิ้ล 3 ตัว</button>
+<h1>โปรแกรมวินเลข</h1>
 
-<div class="result" id="output"></div>
-<button class="copy" onclick="copyText()">คัดลอก</button>
+<input id="input" placeholder="ใส่เลขติดกัน เช่น 123456">
+<button class="reset" onclick="resetAll()">Reset</button>
 
-<div class="toast" id="toast">คัดลอกแล้ว</div>
+<h3>เลขตั้งต้น</h3>
+<div id="base">-</div>
+
+<h3>วิน 2 ตัว ไม่รวมเบิ้ล <button class="copy" onclick="copyText('twoNo')">คัดลอก</button></h3>
+<div id="twoNo" class="box"></div>
+
+<h3>วิน 2 ตัว รวมเบิ้ล <button class="copy" onclick="copyText('twoYes')">คัดลอก</button></h3>
+<div id="twoYes" class="box"></div>
+
+<h3>วิน 3 ตัว ไม่รวมเบิ้ล <button class="copy" onclick="copyText('threeNo')">คัดลอก</button></h3>
+<div id="threeNo" class="box"></div>
+
+<h3>วิน 3 ตัว รวมเบิ้ล <button class="copy" onclick="copyText('threeYes')">คัดลอก</button></h3>
+<div id="threeYes" class="box"></div>
+
+<div id="toast" class="toast">คัดลอกแล้ว</div>
 
 <script>
-function unique(arr){return [...new Set(arr)];}
+const input=document.getElementById("input");
 
-function gen2(double){
-  const n=document.getElementById('input').value;
-  if(n.length<2) return;
-  let r=[];
-  for(let i=0;i<n.length;i++){
-    for(let j=0;j<n.length;j++){
-      if(!double && i===j) continue;
-      r.push(n[i]+n[j]);
+input.addEventListener("input",()=>{
+    const raw=input.value.trim();
+
+    // ❌ ถ้ามีอักขระอื่นหรือเว้นวรรค → ไม่ทำงาน
+    if(!/^[0-9]+$/.test(raw)){
+        resetResult();
+        return;
     }
-  }
-  show(r);
-}
 
-function gen3(double){
-  const n=document.getElementById('input').value;
-  if(n.length<3) return;
-  let r=[];
-  for(let i=0;i<n.length;i++){
-    for(let j=0;j<n.length;j++){
-      for(let k=0;k<n.length;k++){
-        if(!double && (i===j||i===k||j===k)) continue;
-        r.push(n[i]+n[j]+n[k]);
-      }
+    // ตัดตัวซ้ำ
+    let clean="";
+    for(let c of raw){
+        if(!clean.includes(c)) clean+=c;
     }
-  }
-  show(r);
+
+    document.getElementById("base").innerText=clean;
+    generate(clean);
+});
+
+function generate(num){
+    let d=num.split("");
+
+    // ===== 2 ตัว =====
+    let twoNo=[],twoYes=[];
+    for(let i=0;i<d.length;i++){
+        for(let j=0;j<d.length;j++){
+            if(i===j) continue;
+            let n=d[i]+d[j];
+            if(d[i]!==d[j]) twoNo.push(n);
+            twoYes.push(n);
+        }
+    }
+
+    // เพิ่มเบิ้ล
+    d.forEach(x=>twoYes.push(x+x));
+
+    document.getElementById("twoNo").innerText=[...new Set(twoNo)].join(" ");
+    document.getElementById("twoYes").innerText=[...new Set(twoYes)].join(" ");
+
+    // ===== 3 ตัว =====
+    let threeNo=[],threeYes=[];
+    for(let i=0;i<d.length;i++){
+        for(let j=0;j<d.length;j++){
+            for(let k=0;k<d.length;k++){
+                let n=d[i]+d[j]+d[k];
+                threeYes.push(n);
+                if(d[i]!==d[j] && d[j]!==d[k] && d[i]!==d[k]){
+                    threeNo.push(n);
+                }
+            }
+        }
+    }
+
+    document.getElementById("threeNo").innerText=[...new Set(threeNo)].join(" ");
+    document.getElementById("threeYes").innerText=[...new Set(threeYes)].join(" ");
 }
 
-function show(arr){
-  document.getElementById('output').innerText = unique(arr).join(' ');
+function copyText(id){
+    navigator.clipboard.writeText(document.getElementById(id).innerText);
+    const t=document.getElementById("toast");
+    t.style.opacity=1;
+    setTimeout(()=>t.style.opacity=0,1200);
 }
 
-function copyText(){
-  const t=document.getElementById('output').innerText;
-  navigator.clipboard.writeText(t);
-  const toast=document.getElementById('toast');
-  toast.classList.add('show');
-  setTimeout(()=>toast.classList.remove('show'),1500);
+function resetResult(){
+    ["twoNo","twoYes","threeNo","threeYes"].forEach(id=>document.getElementById(id).innerText="");
+    document.getElementById("base").innerText="-";
+}
+
+function resetAll(){
+    input.value="";
+    resetResult();
 }
 </script>
-
 </body>
 </html>
+
+
 
