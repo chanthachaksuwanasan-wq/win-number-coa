@@ -4,9 +4,6 @@
 <meta charset="UTF-8">
 <title>เขียนจากโปรแกรมเมอร์เจมส์</title>
 
-<!-- favicon -->
-<link rel="icon" href="favicon.ico" type="image/x-icon">
-
 <style>
 body{
   background:#000;
@@ -17,11 +14,11 @@ body{
 input{
   font-size:18px;
   padding:8px;
-  width:220px;
+  width:260px;
 }
 button{
-  padding:8px 14px;
-  margin:4px;
+  padding:6px 12px;
+  margin:5px;
   cursor:pointer;
 }
 .box{
@@ -30,17 +27,14 @@ button{
   border-radius:10px;
   padding:12px;
   margin:10px auto;
-  width:90%;
-  max-width:900px;
+  width:95%;
+  max-width:1000px;
   word-wrap:break-word;
 }
-h1{margin-top:20px;}
-.sub{color:#00e5ff;}
 .copy{
-  background:#00e5ff;
-  border:none;
-  border-radius:6px;
+  margin-top:6px;
 }
+.sub{color:#00e5ff;}
 </style>
 </head>
 
@@ -50,29 +44,27 @@ h1{margin-top:20px;}
 <div class="sub">เขียนจากโปรแกรมเมอร์เจมส์</div>
 
 <br>
-<input id="input" placeholder="ใส่เลข เช่น 123456">
-<br><br>
-<button onclick="run()">คำนวณ</button>
+<input id="input" placeholder="ใส่เลขติดกัน เช่น 123456" oninput="run()">
 <button onclick="resetAll()">Reset</button>
 
-<p>เลขตั้งต้น</p>
+<p>เลขตั้งต้น (ตัดซ้ำแล้ว)</p>
 <div id="base"></div>
 
 <h3>วิน 2 ตัว ไม่รวมเบิ้ล</h3>
-<button class="copy" onclick="copyText('w2')">คัดลอก</button>
 <div class="box" id="w2"></div>
+<button class="copy" onclick="copyText('w2')">คัดลอก</button>
 
 <h3>วิน 2 ตัว รวมเบิ้ล</h3>
-<button class="copy" onclick="copyText('w2d')">คัดลอก</button>
 <div class="box" id="w2d"></div>
+<button class="copy" onclick="copyText('w2d')">คัดลอก</button>
 
 <h3>วิน 3 ตัว ไม่รวมเบิ้ล</h3>
-<button class="copy" onclick="copyText('w3')">คัดลอก</button>
 <div class="box" id="w3"></div>
+<button class="copy" onclick="copyText('w3')">คัดลอก</button>
 
 <h3>วิน 3 ตัว รวมเบิ้ล</h3>
-<button class="copy" onclick="copyText('w3d')">คัดลอก</button>
 <div class="box" id="w3d"></div>
+<button class="copy" onclick="copyText('w3d')">คัดลอก</button>
 
 <script>
 function cleanInput(v){
@@ -85,14 +77,19 @@ function unique(arr){
 
 function run(){
   const raw = document.getElementById("input").value;
-  const num = cleanInput(raw);
 
-  if(!/^\d{2,}$/.test(num)){
-    alert("กรุณาใส่เลขติดกันเท่านั้น เช่น 123456");
+  // ❌ ถ้ามีเว้นวรรค , . หรือคั่น → ไม่ทำงาน
+  if(/[^0-9]/.test(raw)){
+    resetResult();
     return;
   }
 
-  const d = unique(num.split(''));
+  if(raw.length < 2){
+    resetResult();
+    return;
+  }
+
+  const d = unique(raw.split(''));
   document.getElementById("base").innerText = d.join('');
 
   // 2 ตัว ไม่รวมเบิ้ล
@@ -106,7 +103,8 @@ function run(){
   // 2 ตัว รวมเบิ้ล (ไม่กลับ)
   let w2d=[];
   for(let i=0;i<d.length;i++){
-    for(let j=i;j<d.length;j++){
+    w2d.push(d[i]+d[i]);
+    for(let j=i+1;j<d.length;j++){
       w2d.push(d[i]+d[j]);
     }
   }
@@ -124,17 +122,15 @@ function run(){
   // 3 ตัว รวมเบิ้ล (ไม่กลับ)
   let w3d=[];
   for(let i=0;i<d.length;i++){
-    for(let j=i;j<d.length;j++){
-      for(let k=j;k<d.length;k++){
+    w3d.push(d[i]+d[i]+d[i]);
+    for(let j=i+1;j<d.length;j++){
+      w3d.push(d[i]+d[i]+d[j]);
+      w3d.push(d[i]+d[j]+d[j]);
+      for(let k=j+1;k<d.length;k++){
         w3d.push(d[i]+d[j]+d[k]);
       }
     }
   }
-
-  w2 = [...new Set(w2)];
-  w2d = [...new Set(w2d)];
-  w3 = [...new Set(w3)];
-  w3d = [...new Set(w3d)];
 
   document.getElementById("w2").innerText = w2.join(' ');
   document.getElementById("w2d").innerText = w2d.join(' ');
@@ -142,24 +138,31 @@ function run(){
   document.getElementById("w3d").innerText = w3d.join(' ');
 }
 
-function copyText(id){
-  const text = document.getElementById(id).innerText;
-  if(!text) return;
-  navigator.clipboard.writeText(text);
-}
-
-function resetAll(){
-  document.getElementById("input").value='';
+function resetResult(){
   document.getElementById("base").innerText='';
   document.getElementById("w2").innerText='';
   document.getElementById("w2d").innerText='';
   document.getElementById("w3").innerText='';
   document.getElementById("w3d").innerText='';
 }
+
+function resetAll(){
+  document.getElementById("input").value='';
+  resetResult();
+}
+
+function copyText(id){
+  const text = document.getElementById(id).innerText;
+  if(!text) return;
+  navigator.clipboard.writeText(text);
+  alert("คัดลอกแล้ว");
+}
 </script>
 
 </body>
 </html>
+
+
 
 
 
