@@ -14,11 +14,11 @@ body{
 input{
   font-size:18px;
   padding:8px;
-  width:260px;
+  width:220px;
 }
 button{
-  padding:6px 12px;
-  margin:5px;
+  padding:8px 14px;
+  margin-left:6px;
   cursor:pointer;
 }
 .box{
@@ -27,14 +27,28 @@ button{
   border-radius:10px;
   padding:12px;
   margin:10px auto;
-  width:95%;
-  max-width:1000px;
+  width:90%;
+  max-width:900px;
   word-wrap:break-word;
 }
-.copy{
-  margin-top:6px;
+h1{margin-top:20px;}
+.sub{color:#00e5ff}
+
+/* toast */
+#toast{
+  position:fixed;
+  bottom:30px;
+  left:50%;
+  transform:translateX(-50%);
+  background:#00c853;
+  color:#fff;
+  padding:10px 18px;
+  border-radius:20px;
+  opacity:0;
+  transition:.3s;
+  z-index:9999;
 }
-.sub{color:#00e5ff;}
+#toast.show{opacity:1}
 </style>
 </head>
 
@@ -44,27 +58,25 @@ button{
 <div class="sub">เขียนจากโปรแกรมเมอร์เจมส์</div>
 
 <br>
-<input id="input" placeholder="ใส่เลขติดกัน เช่น 123456" oninput="run()">
+<input id="input" placeholder="ใส่เลข เช่น 123456">
 <button onclick="resetAll()">Reset</button>
 
-<p>เลขตั้งต้น (ตัดซ้ำแล้ว)</p>
+<p>เลขตั้งต้น</p>
 <div id="base"></div>
 
-<h3>วิน 2 ตัว ไม่รวมเบิ้ล</h3>
+<h3>วิน 2 ตัว ไม่รวมเบิ้ล <button onclick="copyText('w2')">คัดลอก</button></h3>
 <div class="box" id="w2"></div>
-<button class="copy" onclick="copyText('w2')">คัดลอก</button>
 
-<h3>วิน 2 ตัว รวมเบิ้ล</h3>
+<h3>วิน 2 ตัว รวมเบิ้ล <button onclick="copyText('w2d')">คัดลอก</button></h3>
 <div class="box" id="w2d"></div>
-<button class="copy" onclick="copyText('w2d')">คัดลอก</button>
 
-<h3>วิน 3 ตัว ไม่รวมเบิ้ล</h3>
+<h3>วิน 3 ตัว ไม่รวมเบิ้ล <button onclick="copyText('w3')">คัดลอก</button></h3>
 <div class="box" id="w3"></div>
-<button class="copy" onclick="copyText('w3')">คัดลอก</button>
 
-<h3>วิน 3 ตัว รวมเบิ้ล</h3>
+<h3>วิน 3 ตัว รวมเบิ้ล <button onclick="copyText('w3d')">คัดลอก</button></h3>
 <div class="box" id="w3d"></div>
-<button class="copy" onclick="copyText('w3d')">คัดลอก</button>
+
+<div id="toast">คัดลอกแล้ว</div>
 
 <script>
 function cleanInput(v){
@@ -75,21 +87,18 @@ function unique(arr){
   return [...new Set(arr)];
 }
 
+document.getElementById("input").addEventListener("input", run);
+
 function run(){
   const raw = document.getElementById("input").value;
+  const num = cleanInput(raw);
 
-  // ❌ ถ้ามีเว้นวรรค , . หรือคั่น → ไม่ทำงาน
-  if(/[^0-9]/.test(raw)){
-    resetResult();
+  if(num.length < 2){
+    resetOutput();
     return;
   }
 
-  if(raw.length < 2){
-    resetResult();
-    return;
-  }
-
-  const d = unique(raw.split(''));
+  const d = unique(num.split(''));
   document.getElementById("base").innerText = d.join('');
 
   // 2 ตัว ไม่รวมเบิ้ล
@@ -132,13 +141,18 @@ function run(){
     }
   }
 
+  w2 = unique(w2);
+  w2d = unique(w2d);
+  w3 = unique(w3);
+  w3d = unique(w3d);
+
   document.getElementById("w2").innerText = w2.join(' ');
   document.getElementById("w2d").innerText = w2d.join(' ');
   document.getElementById("w3").innerText = w3.join(' ');
   document.getElementById("w3d").innerText = w3d.join(' ');
 }
 
-function resetResult(){
+function resetOutput(){
   document.getElementById("base").innerText='';
   document.getElementById("w2").innerText='';
   document.getElementById("w2d").innerText='';
@@ -148,19 +162,27 @@ function resetResult(){
 
 function resetAll(){
   document.getElementById("input").value='';
-  resetResult();
+  resetOutput();
 }
 
 function copyText(id){
-  const text = document.getElementById(id).innerText;
-  if(!text) return;
-  navigator.clipboard.writeText(text);
-  alert("คัดลอกแล้ว");
+  const t = document.getElementById(id).innerText;
+  if(!t) return;
+  navigator.clipboard.writeText(t);
+  showToast();
+}
+
+function showToast(){
+  const t=document.getElementById("toast");
+  t.classList.add("show");
+  setTimeout(()=>t.classList.remove("show"),1500);
 }
 </script>
 
 </body>
 </html>
+
+
 
 
 
